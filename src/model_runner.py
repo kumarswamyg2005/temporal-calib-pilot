@@ -256,6 +256,12 @@ def load_model(model_name: str | None = None, load_in_4bit: bool | None = None):
             "bitsandbytes works on this image, set TCP_LOAD_IN_4BIT=1."
         )
 
+    # Best-effort: reduce allocator fragmentation before any CUDA alloc.
+    # Must be set before torch.cuda is initialised to take full effect; in a
+    # Kaggle notebook that's usually the GPU-check cell, so this fires too late
+    # on a warm kernel — but it is a no-op rather than an error in that case.
+    os.environ.setdefault("PYTORCH_ALLOC_CONF", "expandable_segments:True")
+
     kwargs: dict = {"device_map": "auto", "low_cpu_mem_usage": True}
     if load_in_4bit:
         try:
@@ -280,6 +286,18 @@ def load_model(model_name: str | None = None, load_in_4bit: bool | None = None):
         log(f"Loading {model_name} (4-bit nf4, device_map=auto)...")
     else:
         kwargs["torch_dtype"] = torch.float16
+        # Cap per-GPU weight allocation so accelerate leaves headroom for the
+        # lm_head dispatch during generation.  Without a cap, device_map="auto"
+        # fills GPU 0 to ~96% (12.85/14.56 GB on T4); the 1.5 GB lm_head
+        # tensor then cannot be moved there and OOMs on the first forward pass.
+        # Setting GPU 0 to 12 GiB frees ~2.5 GB for activation / lm_head
+        # dispatch; excess weights (~2 GB) spill to CPU, which is tolerable.
+        n_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+        if n_gpus >= 2:
+            kwargs["max_memory"] = {0: "12GiB", 1: "14GiB", "cpu": "20GiB"}
+            log("fp16 multi-GPU: capping GPU 0 at 12 GiB to leave lm_head headroom.")
+        elif n_gpus == 1:
+            kwargs["max_memory"] = {0: "14GiB", "cpu": "20GiB"}
         log(f"Loading {model_name} (fp16, device_map=auto)...")
 
     try:
