@@ -15,8 +15,11 @@ tokenizers==0.21.0
 safetensors==0.4.5
 
 # 4-bit (nf4) quantization so the 14B/32B R1 distills fit a 16 GB GPU.
-# Needs a CUDA build of torch present (it is, on Kaggle/Colab GPU).
-bitsandbytes==0.45.0
+# Must match the platform's torch CUDA build. Kaggle's torch is bleeding-edge
+# (e.g. 2.10+cu128), for which an old pin fails transformers'
+# is_bitsandbytes_available() check -- so the notebook force-upgrades to the
+# newest build. Floor only here; do not hard-pin for Kaggle.
+bitsandbytes>=0.46.1
 
 numpy==1.26.4
 pandas==2.2.2
