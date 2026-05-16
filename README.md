@@ -130,3 +130,4 @@ outputs/                    results.csv, summary_table.csv, pilot_chart.png
 - Paid APIs (GPT-4o, Claude): fill in `src/api_runner.py` (`APIModel`).
 - Scale to ~1,200 questions: dataset format already supports it.
 - Logprob confidence: implement `get_logprob_confidence`.
+# Temporal-Calibration-Pilot
