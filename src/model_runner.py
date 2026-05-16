@@ -29,18 +29,24 @@ from .prompts import (
 )
 
 # Model selection. The 7B distill is too weak factually for the temporal
-# hypothesis (uniform ~8-22% accuracy floor). Default is now the 14B distill
-# in 4-bit (nf4) — same R1 family so ON-vs-OFF stays a within-model contrast,
-# ~10 GB so it fits a single 16 GB Kaggle GPU, much better factual recall.
+# hypothesis (uniform ~8-22% accuracy floor). Default is the 14B distill in
+# fp16 sharded across 2 GPUs — same R1 family so ON-vs-OFF stays a within-model
+# contrast, much better factual recall.
 #
-# All three are overridable via environment so a re-run needs no code edit:
+# Why fp16 (not 4-bit) by default: Kaggle's torch is bleeding-edge (cu128) and
+# no bitsandbytes wheel reliably loads against it, so 4-bit kept failing
+# transformers' is_bitsandbytes_available() check. fp16 needs no bitsandbytes
+# at all; 14B fp16 (~28 GB) fits across the GPU **T4 x2** accelerator
+# (2 x ~15 GB) via device_map="auto". 4-bit is still available where it works.
+#
+# Overridable via environment so a re-run needs no code edit:
 #   TCP_MODEL_NAME       e.g. deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
-#   TCP_LOAD_IN_4BIT     "1"/"0"  (32B on T4x2 needs 4bit; 7B fp16 can be "0")
+#   TCP_LOAD_IN_4BIT     "1" to opt INTO 4-bit (only if bitsandbytes works)
 #   TCP_MAX_NEW_TOKENS_ON  reasoning-budget override (default 1024; lower =
 #                          faster. 14B at 2048 risks blowing the 60-min target)
 DEFAULT_MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B"
 MODEL_NAME = os.environ.get("TCP_MODEL_NAME", DEFAULT_MODEL_NAME)
-LOAD_IN_4BIT = os.environ.get("TCP_LOAD_IN_4BIT", "1") == "1"
+LOAD_IN_4BIT = os.environ.get("TCP_LOAD_IN_4BIT", "0") == "1"
 SEED = 42
 
 # DeepSeek's recommended sampling settings for the R1 family.
@@ -94,21 +100,68 @@ def set_seed(seed: int = SEED) -> None:
         pass
 
 
+def _total_vram_gb() -> float:
+    """Return summed total VRAM across all visible CUDA devices, in GB."""
+    import torch
+
+    if not torch.cuda.is_available():
+        return 0.0
+    return sum(
+        torch.cuda.get_device_properties(i).total_memory
+        for i in range(torch.cuda.device_count())
+    ) / 1e9
+
+
 def cuda_memory_summary() -> str:
-    """Return a short human-readable CUDA memory usage string.
+    """Return a short human-readable per-GPU memory usage string.
+
+    Reports every visible GPU (the default 14B-fp16 setup shards across two),
+    plus the summed total.
 
     Returns:
-        str: e.g. ``"GPU: 14.2/16.0 GB allocated"`` or a CPU notice.
+        str: e.g. ``"2x GPU | Tesla T4: 13.9/15.6 GB; Tesla T4: 13.7/15.6 GB
+        | total 31.2 GB"`` or a CPU notice.
     """
     import torch
 
     if not torch.cuda.is_available():
         return "CUDA not available (running on CPU — expect this to be slow)."
-    idx = torch.cuda.current_device()
-    name = torch.cuda.get_device_name(idx)
-    alloc = torch.cuda.memory_allocated(idx) / 1e9
-    total = torch.cuda.get_device_properties(idx).total_memory / 1e9
-    return f"GPU [{name}]: {alloc:.1f}/{total:.1f} GB allocated"
+    parts, total = [], 0.0
+    for i in range(torch.cuda.device_count()):
+        name = torch.cuda.get_device_name(i)
+        alloc = torch.cuda.memory_allocated(i) / 1e9
+        cap = torch.cuda.get_device_properties(i).total_memory / 1e9
+        total += cap
+        parts.append(f"{name}: {alloc:.1f}/{cap:.1f} GB")
+    return (
+        f"{torch.cuda.device_count()}x GPU | "
+        + "; ".join(parts)
+        + f" | total {total:.1f} GB"
+    )
+
+
+def _estimate_vram_need_gb(model_name: str, load_in_4bit: bool) -> float:
+    """Rough VRAM needed to load + run a model, in GB.
+
+    fp16 ≈ 2 bytes/param plus headroom; 4-bit ≈ ~1/3.5 of that. Size is read
+    from the parameter count in the repo id (``...-7B``, ``-14B``, ``-32B``).
+
+    Args:
+        model_name: HF repo id.
+        load_in_4bit: Whether 4-bit quantization is used.
+
+    Returns:
+        float: Estimated VRAM requirement in GB.
+    """
+    import re as _re
+
+    m = _re.search(r"(\d+(?:\.\d+)?)\s*[bB]\b", model_name)
+    params_b = float(m.group(1)) if m else 8.0
+    # Weights (~2 B/param) + modest headroom. device_map="auto" spills overflow
+    # to CPU rather than OOM-ing, so keep the bar low enough that a genuine
+    # T4 x2 (~31 GB) clears 14B fp16 (~30 GB) but a single T4 (~16 GB) fails.
+    fp16_gb = params_b * 2.0 + 2.0
+    return fp16_gb / 3.5 if load_in_4bit else fp16_gb
 
 
 def _free_cuda() -> None:
@@ -171,15 +224,45 @@ def load_model(model_name: str | None = None, load_in_4bit: bool | None = None):
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     set_seed(SEED)
+
+    # --- Preflight: fail fast with an actionable message BEFORE the multi-GB
+    # download, instead of OOM-ing or hitting a confusing bitsandbytes error.
+    have_gb = _total_vram_gb()
+    need_gb = _estimate_vram_need_gb(model_name, load_in_4bit)
+    log(
+        f"Preflight: need ~{need_gb:.0f} GB "
+        f"({'4-bit' if load_in_4bit else 'fp16'}), have {have_gb:.0f} GB "
+        f"across visible GPUs."
+    )
+    if have_gb == 0.0:
+        raise RuntimeError(
+            "No CUDA GPU visible. In Kaggle Settings pick the GPU "
+            "accelerator (use 'GPU T4 x2' for the 14B fp16 default)."
+        )
+    if have_gb + 1.0 < need_gb:
+        raise RuntimeError(
+            f"{model_name} ({'4-bit' if load_in_4bit else 'fp16'}) needs "
+            f"~{need_gb:.0f} GB but only {have_gb:.0f} GB is visible. "
+            "Fix one of: (a) set the accelerator to 'GPU T4 x2' (2x16 GB, "
+            "fits 14B fp16); (b) use a smaller model via TCP_MODEL_NAME "
+            "(e.g. deepseek-ai/DeepSeek-R1-Distill-Qwen-7B); or (c) if "
+            "bitsandbytes works on this image, set TCP_LOAD_IN_4BIT=1."
+        )
+
     kwargs: dict = {"device_map": "auto", "low_cpu_mem_usage": True}
     if load_in_4bit:
         try:
             from transformers import BitsAndBytesConfig
+            from transformers.utils import is_bitsandbytes_available
+
+            if not is_bitsandbytes_available():
+                raise ImportError("transformers cannot see a usable bitsandbytes")
         except ImportError as exc:
             raise RuntimeError(
-                "4-bit loading needs bitsandbytes. `pip install bitsandbytes` "
-                "(the notebook's setup cell does this), or set "
-                "TCP_LOAD_IN_4BIT=0 to load in fp16."
+                "4-bit requested (TCP_LOAD_IN_4BIT=1) but bitsandbytes is not "
+                f"usable on this image ({exc}). Kaggle's torch (cu128) often "
+                "has no compatible bitsandbytes wheel. Use the fp16 default "
+                "(unset TCP_LOAD_IN_4BIT) with the 'GPU T4 x2' accelerator."
             ) from exc
         kwargs["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,

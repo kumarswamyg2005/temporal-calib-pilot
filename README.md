@@ -8,17 +8,28 @@ distance from the July 2024 cutoff.
 
 **Model:** the 7B distill was tried first and proved too weak factually
 (uniform ~8–22% accuracy, no temporal gradient — a floor effect, see "Run
-history" below). The default is now **DeepSeek-R1-Distill-Qwen-14B in 4-bit**
-(same R1 family → ON-vs-OFF is still a within-model contrast; ~10 GB, fits one
-16 GB GPU). Change model with **no code edit** via environment variables:
+history" below). The default is now **DeepSeek-R1-Distill-Qwen-14B in fp16**,
+sharded across the Kaggle **`GPU T4 x2`** accelerator (2×16 GB ≈ 31 GB; 14B
+fp16 ≈ 30 GB) via `device_map="auto"`. Same R1 family → ON-vs-OFF stays a
+within-model contrast.
+
+> **Why fp16, not 4-bit?** Kaggle's torch is bleeding-edge (`cu128`) and no
+> bitsandbytes wheel reliably loads against it, so 4-bit kept failing
+> `is_bitsandbytes_available()`. fp16 needs no bitsandbytes at all. 4-bit is
+> still selectable (`TCP_LOAD_IN_4BIT=1`) on images where bitsandbytes works.
+
+Change behaviour with **no code edit** via environment variables:
 
 | env var | default | purpose |
 | --- | --- | --- |
-| `TCP_MODEL_NAME` | `deepseek-ai/DeepSeek-R1-Distill-Qwen-14B` | any HF R1-distill repo |
-| `TCP_LOAD_IN_4BIT` | `1` | `0` = fp16 (only for small models) |
-| `TCP_MAX_NEW_TOKENS_ON` | `1024` | reasoning budget; lower = faster |
+| `TCP_MODEL_NAME` | `…/DeepSeek-R1-Distill-Qwen-14B` | any HF R1-distill repo |
+| `TCP_LOAD_IN_4BIT` | `0` | `1` to opt into 4-bit (needs working bitsandbytes) |
+| `TCP_MAX_NEW_TOKENS_ON` | `1024` | reasoning budget; lower = faster / less VRAM |
 
-Set them in the first notebook cell, e.g. `import os; os.environ["TCP_MODEL_NAME"]="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"` (32B needs the T4×2 accelerator).
+Set them in a cell above the imports, e.g.
+`import os; os.environ["TCP_MAX_NEW_TOKENS_ON"]="512"`. A preflight check in
+`load_model` fails fast with an actionable message if the visible VRAM is too
+small (e.g. you forgot to pick `GPU T4 x2`).
 
 ## How to run it on Kaggle
 
