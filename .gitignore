@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv*/
+.env
+
+# Generated study artifacts (re-created by running the notebook)
+outputs/results.csv
+outputs/summary_table.csv
+outputs/pilot_chart.png
+data/results.csv
+
+# OS / editor
+.DS_Store
+.ipynb_checkpoints/

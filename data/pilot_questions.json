@@ -1,0 +1,573 @@
+{
+  "meta": {
+    "model_under_test": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+    "training_cutoff": "2024-07-01",
+    "cutoff_note": "DeepSeek-R1 distilled models report a knowledge cutoff around July 2024. Every answer below refers to an event that occurred strictly BEFORE 2024-07-01.",
+    "buckets": {
+      "B1": {"distance_months": 24, "nominal_period": "~2022-07"},
+      "B2": {"distance_months": 12, "nominal_period": "~2023-07"},
+      "B3": {"distance_months": 6, "nominal_period": "~2024-01"},
+      "B4": {"distance_months": 3, "nominal_period": "~2024-04"},
+      "B5": {"distance_months": 1, "nominal_period": "~2024-06"}
+    },
+    "categories": ["sports", "politics", "tech", "science", "entertainment"],
+    "design": "10 questions per bucket, 2 per category per bucket, hand-curated, factual, non-opinion.",
+    "curation_note": "The build spec's worked example asked for the 2024 UEFA Euro final, but that final was played 2024-07-14 (on/after the stated cutoff), so its ground truth is unsafe for a calibration study. It was replaced with the 2024 UEFA Champions League final (2024-06-01), which is unambiguously pre-cutoff."
+  },
+  "questions": [
+    {
+      "id": "Q001",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-05-28",
+      "category": "sports",
+      "question": "Which club won the 2022 UEFA Champions League final?",
+      "answer": "Real Madrid",
+      "answer_aliases": ["Real Madrid", "Real Madrid CF", "Madrid"],
+      "source": "Wikipedia: 2022 UEFA Champions League final (Real Madrid 1-0 Liverpool)"
+    },
+    {
+      "id": "Q002",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-06-16",
+      "category": "sports",
+      "question": "Which team won the 2022 NBA Finals?",
+      "answer": "Golden State Warriors",
+      "answer_aliases": ["Golden State Warriors", "Golden State", "Warriors", "GSW"],
+      "source": "Wikipedia: 2022 NBA Finals (Golden State Warriors 4-2 Boston Celtics)"
+    },
+    {
+      "id": "Q003",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-04-24",
+      "category": "politics",
+      "question": "Who won the 2022 French presidential election?",
+      "answer": "Emmanuel Macron",
+      "answer_aliases": ["Emmanuel Macron", "Macron"],
+      "source": "Wikipedia: 2022 French presidential election (Macron re-elected)"
+    },
+    {
+      "id": "Q004",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-05-21",
+      "category": "politics",
+      "question": "Which political party won the 2022 Australian federal election?",
+      "answer": "Australian Labor Party",
+      "answer_aliases": ["Labor Party", "Australian Labor Party", "Labor", "ALP", "the Labor Party"],
+      "source": "Wikipedia: 2022 Australian federal election (Labor, Anthony Albanese PM)"
+    },
+    {
+      "id": "Q005",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-06-06",
+      "category": "tech",
+      "question": "Which system-on-chip did Apple unveil at WWDC in June 2022?",
+      "answer": "Apple M2",
+      "answer_aliases": ["M2", "Apple M2", "M2 chip", "the M2"],
+      "source": "Wikipedia: Apple M2 (announced WWDC June 6, 2022)"
+    },
+    {
+      "id": "Q006",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-01-18",
+      "category": "tech",
+      "question": "In January 2022, which company announced an agreement to acquire Activision Blizzard?",
+      "answer": "Microsoft",
+      "answer_aliases": ["Microsoft", "Microsoft Corporation"],
+      "source": "Wikipedia: Microsoft acquisition of Activision Blizzard (announced Jan 18, 2022)"
+    },
+    {
+      "id": "Q007",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-07-12",
+      "category": "science",
+      "question": "NASA released the first full-color science images from which space telescope in July 2022?",
+      "answer": "James Webb Space Telescope",
+      "answer_aliases": ["James Webb Space Telescope", "JWST", "Webb", "James Webb"],
+      "source": "Wikipedia: James Webb Space Telescope (first images July 12, 2022)"
+    },
+    {
+      "id": "Q008",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-09-26",
+      "category": "science",
+      "question": "Which asteroid moonlet did NASA's DART spacecraft deliberately collide with in 2022?",
+      "answer": "Dimorphos",
+      "answer_aliases": ["Dimorphos"],
+      "source": "Wikipedia: Double Asteroid Redirection Test (impact Sept 26, 2022)"
+    },
+    {
+      "id": "Q009",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-03-27",
+      "category": "entertainment",
+      "question": "Which film won Best Picture at the 94th Academy Awards (2022)?",
+      "answer": "CODA",
+      "answer_aliases": ["CODA"],
+      "source": "Wikipedia: 94th Academy Awards (CODA won Best Picture)"
+    },
+    {
+      "id": "Q010",
+      "bucket": "B1",
+      "distance_months": 24,
+      "event_date": "2022-04-03",
+      "category": "entertainment",
+      "question": "Which album won Album of the Year at the 2022 (64th) Grammy Awards?",
+      "answer": "We Are",
+      "answer_aliases": ["We Are", "We Are by Jon Batiste", "Jon Batiste - We Are"],
+      "source": "Wikipedia: 64th Annual Grammy Awards (Jon Batiste, 'We Are')"
+    },
+
+    {
+      "id": "Q011",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-06-10",
+      "category": "sports",
+      "question": "Which club won the 2023 UEFA Champions League final?",
+      "answer": "Manchester City",
+      "answer_aliases": ["Manchester City", "Man City", "Manchester City FC", "City"],
+      "source": "Wikipedia: 2023 UEFA Champions League final (Man City 1-0 Inter Milan)"
+    },
+    {
+      "id": "Q012",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-06-12",
+      "category": "sports",
+      "question": "Which team won the 2023 NBA Finals?",
+      "answer": "Denver Nuggets",
+      "answer_aliases": ["Denver Nuggets", "Denver", "Nuggets"],
+      "source": "Wikipedia: 2023 NBA Finals (Denver Nuggets 4-1 Miami Heat)"
+    },
+    {
+      "id": "Q013",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-05-28",
+      "category": "politics",
+      "question": "Who won the 2023 Turkish presidential election?",
+      "answer": "Recep Tayyip Erdogan",
+      "answer_aliases": ["Recep Tayyip Erdogan", "Erdogan", "Erdoğan", "Recep Tayyip Erdoğan"],
+      "source": "Wikipedia: 2023 Turkish presidential election (Erdoğan, runoff May 28)"
+    },
+    {
+      "id": "Q014",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-02-25",
+      "category": "politics",
+      "question": "Who won the 2023 Nigerian presidential election?",
+      "answer": "Bola Tinubu",
+      "answer_aliases": ["Bola Tinubu", "Tinubu", "Bola Ahmed Tinubu"],
+      "source": "Wikipedia: 2023 Nigerian presidential election (Tinubu, inaugurated May 29, 2023)"
+    },
+    {
+      "id": "Q015",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-06-05",
+      "category": "tech",
+      "question": "Which mixed-reality headset did Apple announce at WWDC in June 2023?",
+      "answer": "Apple Vision Pro",
+      "answer_aliases": ["Apple Vision Pro", "Vision Pro"],
+      "source": "Wikipedia: Apple Vision Pro (announced WWDC June 5, 2023)"
+    },
+    {
+      "id": "Q016",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-07-05",
+      "category": "tech",
+      "question": "Which text-based social media app did Meta launch in July 2023 as a competitor to Twitter?",
+      "answer": "Threads",
+      "answer_aliases": ["Threads", "Meta Threads", "Instagram Threads"],
+      "source": "Wikipedia: Threads (Meta) launched July 5, 2023"
+    },
+    {
+      "id": "Q017",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-07-14",
+      "category": "science",
+      "question": "What is the name of India's lunar mission launched in July 2023 that later landed near the Moon's south pole?",
+      "answer": "Chandrayaan-3",
+      "answer_aliases": ["Chandrayaan-3", "Chandrayaan 3", "Chandrayaan3"],
+      "source": "Wikipedia: Chandrayaan-3 (launched July 14, 2023)"
+    },
+    {
+      "id": "Q018",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-10-02",
+      "category": "science",
+      "question": "The 2023 Nobel Prize in Physiology or Medicine was awarded for discoveries enabling the development of which type of vaccine?",
+      "answer": "mRNA vaccines",
+      "answer_aliases": ["mRNA vaccines", "mRNA vaccine", "mRNA", "messenger RNA vaccines"],
+      "source": "Wikipedia: 2023 Nobel Prize in Physiology or Medicine (Karikó & Weissman, mRNA)"
+    },
+    {
+      "id": "Q019",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-03-12",
+      "category": "entertainment",
+      "question": "Which film won Best Picture at the 95th Academy Awards (2023)?",
+      "answer": "Everything Everywhere All at Once",
+      "answer_aliases": ["Everything Everywhere All at Once", "EEAAO"],
+      "source": "Wikipedia: 95th Academy Awards (Everything Everywhere All at Once)"
+    },
+    {
+      "id": "Q020",
+      "bucket": "B2",
+      "distance_months": 12,
+      "event_date": "2023-02-05",
+      "category": "entertainment",
+      "question": "Which album won Album of the Year at the 2023 (65th) Grammy Awards?",
+      "answer": "Harry's House",
+      "answer_aliases": ["Harry's House", "Harrys House", "Harry's House by Harry Styles"],
+      "source": "Wikipedia: 65th Annual Grammy Awards (Harry Styles, 'Harry's House')"
+    },
+
+    {
+      "id": "Q021",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-02-11",
+      "category": "sports",
+      "question": "Which team won Super Bowl LVIII (the February 2024 Super Bowl)?",
+      "answer": "Kansas City Chiefs",
+      "answer_aliases": ["Kansas City Chiefs", "Kansas City", "Chiefs", "KC Chiefs"],
+      "source": "Wikipedia: Super Bowl LVIII (Chiefs 25-22 49ers, Feb 11, 2024)"
+    },
+    {
+      "id": "Q022",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-01-28",
+      "category": "sports",
+      "question": "Who won the men's singles title at the 2024 Australian Open?",
+      "answer": "Jannik Sinner",
+      "answer_aliases": ["Jannik Sinner", "Sinner"],
+      "source": "Wikipedia: 2024 Australian Open – Men's singles (Jannik Sinner)"
+    },
+    {
+      "id": "Q023",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-01-13",
+      "category": "politics",
+      "question": "Who won the January 2024 Taiwan presidential election?",
+      "answer": "Lai Ching-te",
+      "answer_aliases": ["Lai Ching-te", "William Lai", "Lai Ching te", "Lai"],
+      "source": "Wikipedia: 2024 Taiwanese presidential election (Lai Ching-te / William Lai)"
+    },
+    {
+      "id": "Q024",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-02-14",
+      "category": "politics",
+      "question": "Who won the 2024 Indonesian presidential election?",
+      "answer": "Prabowo Subianto",
+      "answer_aliases": ["Prabowo Subianto", "Prabowo"],
+      "source": "Wikipedia: 2024 Indonesian presidential election (Prabowo Subianto)"
+    },
+    {
+      "id": "Q025",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-01-17",
+      "category": "tech",
+      "question": "Which Samsung flagship smartphone series, marketed with 'Galaxy AI', was unveiled in January 2024?",
+      "answer": "Samsung Galaxy S24",
+      "answer_aliases": ["Galaxy S24", "Samsung Galaxy S24", "S24", "Galaxy S24 series"],
+      "source": "Wikipedia: Samsung Galaxy S24 (Unpacked Jan 17, 2024)"
+    },
+    {
+      "id": "Q026",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-02-02",
+      "category": "tech",
+      "question": "Which Apple spatial-computing product went on sale in the United States on February 2, 2024?",
+      "answer": "Apple Vision Pro",
+      "answer_aliases": ["Apple Vision Pro", "Vision Pro"],
+      "source": "Wikipedia: Apple Vision Pro (US retail release Feb 2, 2024)"
+    },
+    {
+      "id": "Q027",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-01-19",
+      "category": "science",
+      "question": "What is the name of the Japanese (JAXA) spacecraft that performed a precision Moon landing in January 2024?",
+      "answer": "SLIM",
+      "answer_aliases": ["SLIM", "Smart Lander for Investigating Moon", "Moon Sniper"],
+      "source": "Wikipedia: SLIM (lunar lander, touchdown Jan 19/20, 2024)"
+    },
+    {
+      "id": "Q028",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-02-22",
+      "category": "science",
+      "question": "Which company's Odysseus lander became the first commercial spacecraft to soft-land on the Moon, in February 2024?",
+      "answer": "Intuitive Machines",
+      "answer_aliases": ["Intuitive Machines", "Odysseus", "IM-1"],
+      "source": "Wikipedia: Intuitive Machines IM-1 / Odysseus (landed Feb 22, 2024)"
+    },
+    {
+      "id": "Q029",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-01-07",
+      "category": "entertainment",
+      "question": "Which film won Best Motion Picture – Drama at the 81st Golden Globe Awards (January 2024)?",
+      "answer": "Oppenheimer",
+      "answer_aliases": ["Oppenheimer"],
+      "source": "Wikipedia: 81st Golden Globe Awards (Oppenheimer, Best Drama)"
+    },
+    {
+      "id": "Q030",
+      "bucket": "B3",
+      "distance_months": 6,
+      "event_date": "2024-02-04",
+      "category": "entertainment",
+      "question": "Which album won Album of the Year at the 66th Annual Grammy Awards (February 2024)?",
+      "answer": "Midnights",
+      "answer_aliases": ["Midnights", "Midnights by Taylor Swift", "Taylor Swift - Midnights"],
+      "source": "Wikipedia: 66th Annual Grammy Awards (Taylor Swift, 'Midnights')"
+    },
+
+    {
+      "id": "Q031",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-04-14",
+      "category": "sports",
+      "question": "Who won the 2024 Masters Tournament in golf?",
+      "answer": "Scottie Scheffler",
+      "answer_aliases": ["Scottie Scheffler", "Scheffler"],
+      "source": "Wikipedia: 2024 Masters Tournament (Scottie Scheffler)"
+    },
+    {
+      "id": "Q032",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-04-08",
+      "category": "sports",
+      "question": "Which men's team won the 2024 NCAA Division I basketball championship?",
+      "answer": "UConn",
+      "answer_aliases": ["UConn", "Connecticut", "Connecticut Huskies", "University of Connecticut"],
+      "source": "Wikipedia: 2024 NCAA Division I men's basketball tournament (UConn beat Purdue)"
+    },
+    {
+      "id": "Q033",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-03-17",
+      "category": "politics",
+      "question": "Who won the 2024 Russian presidential election?",
+      "answer": "Vladimir Putin",
+      "answer_aliases": ["Vladimir Putin", "Putin"],
+      "source": "Wikipedia: 2024 Russian presidential election (Vladimir Putin)"
+    },
+    {
+      "id": "Q034",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-04-09",
+      "category": "politics",
+      "question": "Who became Taoiseach (Prime Minister) of Ireland in April 2024?",
+      "answer": "Simon Harris",
+      "answer_aliases": ["Simon Harris", "Harris"],
+      "source": "Wikipedia: Simon Harris (became Taoiseach April 9, 2024)"
+    },
+    {
+      "id": "Q035",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-04-18",
+      "category": "tech",
+      "question": "Which family of open large language models did Meta release in April 2024?",
+      "answer": "Llama 3",
+      "answer_aliases": ["Llama 3", "Llama3", "Meta Llama 3", "LLaMA 3"],
+      "source": "Wikipedia: Llama (language model) – Llama 3 released April 18, 2024"
+    },
+    {
+      "id": "Q036",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-04-17",
+      "category": "tech",
+      "question": "In April 2024, Boston Dynamics revealed a new fully electric version of which humanoid robot?",
+      "answer": "Atlas",
+      "answer_aliases": ["Atlas", "Atlas robot", "electric Atlas", "new Atlas"],
+      "source": "Wikipedia: Atlas (robot) – electric Atlas revealed April 17, 2024"
+    },
+    {
+      "id": "Q037",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-04-08",
+      "category": "science",
+      "question": "On what date did a total solar eclipse cross North America in April 2024?",
+      "answer": "April 8, 2024",
+      "answer_aliases": ["April 8, 2024", "April 8", "8 April 2024", "2024-04-08"],
+      "source": "Wikipedia: Solar eclipse of April 8, 2024"
+    },
+    {
+      "id": "Q038",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-03-14",
+      "category": "science",
+      "question": "Which SpaceX launch vehicle conducted its third integrated flight test in March 2024?",
+      "answer": "Starship",
+      "answer_aliases": ["Starship", "SpaceX Starship", "Starship IFT-3"],
+      "source": "Wikipedia: SpaceX Starship integrated flight test 3 (March 14, 2024)"
+    },
+    {
+      "id": "Q039",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-03-10",
+      "category": "entertainment",
+      "question": "Which film won Best Picture at the 96th Academy Awards (March 2024)?",
+      "answer": "Oppenheimer",
+      "answer_aliases": ["Oppenheimer"],
+      "source": "Wikipedia: 96th Academy Awards (Oppenheimer, Best Picture)"
+    },
+    {
+      "id": "Q040",
+      "bucket": "B4",
+      "distance_months": 3,
+      "event_date": "2024-03-10",
+      "category": "entertainment",
+      "question": "Who won the Academy Award for Best Actor at the 96th Academy Awards (March 2024)?",
+      "answer": "Cillian Murphy",
+      "answer_aliases": ["Cillian Murphy", "Murphy"],
+      "source": "Wikipedia: 96th Academy Awards (Cillian Murphy, Best Actor, Oppenheimer)"
+    },
+
+    {
+      "id": "Q041",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-01",
+      "category": "sports",
+      "question": "Which club won the 2024 UEFA Champions League final?",
+      "answer": "Real Madrid",
+      "answer_aliases": ["Real Madrid", "Real Madrid CF", "Madrid"],
+      "source": "Wikipedia: 2024 UEFA Champions League final (Real Madrid 2-0 Borussia Dortmund, June 1, 2024)"
+    },
+    {
+      "id": "Q042",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-29",
+      "category": "sports",
+      "question": "Which national team won the 2024 ICC Men's T20 World Cup?",
+      "answer": "India",
+      "answer_aliases": ["India", "Indian cricket team", "Team India"],
+      "source": "Wikipedia: 2024 ICC Men's T20 World Cup final (India beat South Africa, June 29, 2024)"
+    },
+    {
+      "id": "Q043",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-09",
+      "category": "politics",
+      "question": "Who was sworn in for a third consecutive term as Prime Minister of India in June 2024?",
+      "answer": "Narendra Modi",
+      "answer_aliases": ["Narendra Modi", "Modi"],
+      "source": "Wikipedia: 2024 Indian general election (Modi sworn in for third term June 9, 2024)"
+    },
+    {
+      "id": "Q044",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-02",
+      "category": "politics",
+      "question": "Who was elected the first female President of Mexico in June 2024?",
+      "answer": "Claudia Sheinbaum",
+      "answer_aliases": ["Claudia Sheinbaum", "Sheinbaum"],
+      "source": "Wikipedia: 2024 Mexican general election (Claudia Sheinbaum, June 2, 2024)"
+    },
+    {
+      "id": "Q045",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-10",
+      "category": "tech",
+      "question": "What did Apple name the AI system it announced at WWDC in June 2024?",
+      "answer": "Apple Intelligence",
+      "answer_aliases": ["Apple Intelligence"],
+      "source": "Wikipedia: Apple Intelligence (announced WWDC June 10, 2024)"
+    },
+    {
+      "id": "Q046",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-18",
+      "category": "tech",
+      "question": "In June 2024, which chipmaker briefly became the world's most valuable publicly traded company?",
+      "answer": "Nvidia",
+      "answer_aliases": ["Nvidia", "NVIDIA", "Nvidia Corporation"],
+      "source": "Reuters/Wikipedia: Nvidia became world's most valuable company June 18, 2024"
+    },
+    {
+      "id": "Q047",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-06",
+      "category": "science",
+      "question": "In June 2024, SpaceX completed the fourth integrated test flight of which launch vehicle, achieving a controlled splashdown of both stages?",
+      "answer": "Starship",
+      "answer_aliases": ["Starship", "SpaceX Starship", "Starship IFT-4"],
+      "source": "Wikipedia: SpaceX Starship integrated flight test 4 (June 6, 2024)"
+    },
+    {
+      "id": "Q048",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-25",
+      "category": "science",
+      "question": "Which Chinese space mission returned the first samples from the far side of the Moon in June 2024?",
+      "answer": "Chang'e 6",
+      "answer_aliases": ["Chang'e 6", "Change 6", "Chang'e-6", "Chang e 6"],
+      "source": "Wikipedia: Chang'e 6 (far-side sample return, capsule landed June 25, 2024)"
+    },
+    {
+      "id": "Q049",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-16",
+      "category": "entertainment",
+      "question": "Which production won Best Musical at the 77th Tony Awards (June 2024)?",
+      "answer": "The Outsiders",
+      "answer_aliases": ["The Outsiders", "Outsiders"],
+      "source": "Wikipedia: 77th Tony Awards (The Outsiders, Best Musical, June 16, 2024)"
+    },
+    {
+      "id": "Q050",
+      "bucket": "B5",
+      "distance_months": 1,
+      "event_date": "2024-06-14",
+      "category": "entertainment",
+      "question": "Which Pixar sequel was released in June 2024 and went on to become the highest-grossing animated film of all time?",
+      "answer": "Inside Out 2",
+      "answer_aliases": ["Inside Out 2", "Inside Out 2 (film)", "Inside Out Two"],
+      "source": "Wikipedia: Inside Out 2 (released June 14, 2024)"
+    }
+  ]
+}
