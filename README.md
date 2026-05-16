@@ -22,19 +22,24 @@ Set them in the first notebook cell, e.g. `import os; os.environ["TCP_MODEL_NAME
 
 ## How to run it on Kaggle
 
-1. Create a new Kaggle Notebook.
-2. **Settings → Accelerator**: choose **GPU T4 x2** or **GPU P100** (16 GB).
-3. **Settings → Internet**: turn **On** (needed to download model weights).
-4. Get the project files into the kernel (either is fine):
-   - Upload this repo folder as a **Kaggle Dataset** and attach it, **or**
-   - Add a first cell that `git clone`s / copies the repo into the working dir.
-5. Open `notebooks/pilot_study.ipynb` and click **Run All**.
-6. When it finishes, find the artifacts in **`/kaggle/working/outputs/`**:
-   `results.csv`, `summary_table.csv`, `pilot_chart.png`. These persist as
-   notebook output (Save Version → they are downloadable).
+Code lives on GitHub:
+[kumarswamyg2005/temporal-calib-pilot](https://github.com/kumarswamyg2005/temporal-calib-pilot).
+The notebook's first code cell `git clone`s it fresh every run, so **no Kaggle
+dataset upload is ever needed** — push a change, re-run, done.
 
-No Google Drive mount is required. The notebook auto-detects Kaggle and writes
-everything to `/kaggle/working/` so it survives as output.
+1. Create a new Kaggle Notebook and import
+   [`notebooks/pilot_study.ipynb`](notebooks/pilot_study.ipynb) (raw GitHub
+   URL works in File → Import Notebook).
+2. **Settings → Accelerator**: **GPU T4 x2** or **GPU P100** (16 GB).
+3. **Settings → Internet**: **On** (needed for the clone + weight download).
+4. **Run All.** Cell 1 clones the repo into `/kaggle/working`; the locator
+   finds it there (preferred over any stale attached dataset).
+5. Artifacts persist in **`/kaggle/working/outputs/`**, namespaced per model:
+   `results__<model>.csv`, `summary_table__<model>.csv`,
+   `pilot_chart__<model>.png` (Save Version → downloadable).
+
+No Google Drive mount and no dataset attachment required. The notebook
+auto-detects Kaggle and writes everything to `/kaggle/working/`.
 
 > Local / Colab also work: the code auto-detects the platform and falls back to
 > the repo's `outputs/` directory.
