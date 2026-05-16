@@ -52,7 +52,14 @@ SEED = 42
 # DeepSeek's recommended sampling settings for the R1 family.
 TEMPERATURE = 0.6
 TOP_P = 0.95
-_ON_BUDGET = int(os.environ.get("TCP_MAX_NEW_TOKENS_ON", "1024"))
+# ON budget is a *cap*, not a target: an early-stop halts generation the moment
+# the model finishes its ANSWER/CONFIDENCE footer (see _FooterStop), so most
+# answers stop well before this. 768 keeps the cap high enough that genuine
+# reasoning is not truncated (7B run median ON length ~543 tokens) while
+# bounding the slow CPU-offloaded worst case. Override via TCP_MAX_NEW_TOKENS_ON
+# (do NOT go below ~512: that truncates reasoning before ANSWER: and corrupts
+# the ON arm's parse_ok).
+_ON_BUDGET = int(os.environ.get("TCP_MAX_NEW_TOKENS_ON", "768"))
 MAX_NEW_TOKENS: dict[str, int] = {"thinking_on": _ON_BUDGET, "thinking_off": 256}
 
 # Parsing patterns (case-insensitive, last occurrence wins).
@@ -391,12 +398,53 @@ def _strip_inline_confidence(answer: str) -> tuple[str, int | None]:
     return answer, None
 
 
-def _generate(model, tokenizer, prompt_text: str, max_new_tokens: int) -> tuple[str, int]:
-    """Run a single sampling pass and return (new_text, num_new_tokens)."""
-    import torch
+def _build_footer_stop(tokenizer, prompt_len: int):
+    """Build a StoppingCriteria that halts once the ANSWER/CONFIDENCE footer
+    is complete, so a finished answer does not run to the token cap.
 
-    device = next(model.parameters()).device
+    Stops only when BOTH ``ANSWER:`` and ``CONFIDENCE: <digits>`` appear in the
+    generated tail — both together at the end is the required footer and is
+    very unlikely to occur inside the reasoning, so this does not truncate
+    genuine answers.
+
+    Args:
+        tokenizer: The model tokenizer (to decode the tail).
+        prompt_len: Number of prompt tokens to skip when decoding.
+
+    Returns:
+        transformers.StoppingCriteria: The configured criterion.
+    """
+    from transformers import StoppingCriteria
+
+    footer_re = re.compile(
+        r"answer\s*:\s*\S.*?confidence\s*:\s*\d{1,3}", re.IGNORECASE | re.DOTALL
+    )
+
+    class _FooterStop(StoppingCriteria):
+        def __call__(self, input_ids, scores, **kwargs) -> bool:
+            gen = input_ids[0][prompt_len:]
+            if gen.shape[0] < 8:
+                return False
+            tail = tokenizer.decode(gen[-80:], skip_special_tokens=True)
+            return bool(footer_re.search(tail))
+
+    return _FooterStop()
+
+
+def _generate(model, tokenizer, prompt_text: str, max_new_tokens: int) -> tuple[str, int]:
+    """Run a single sampling pass and return (new_text, num_new_tokens).
+
+    Inputs go on ``cuda:0`` when a GPU is present: with ``device_map="auto"``
+    plus CPU offload the first parameter can be on the ``meta`` device, so
+    keying off ``next(model.parameters()).device`` would break — accelerate's
+    hooks dispatch across devices from cuda:0.
+    """
+    import torch
+    from transformers import StoppingCriteriaList
+
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
     inputs = tokenizer(prompt_text, return_tensors="pt").to(device)
+    prompt_len = inputs["input_ids"].shape[1]
     with torch.inference_mode():
         out = model.generate(
             **inputs,
@@ -405,8 +453,11 @@ def _generate(model, tokenizer, prompt_text: str, max_new_tokens: int) -> tuple[
             temperature=TEMPERATURE,
             top_p=TOP_P,
             pad_token_id=tokenizer.eos_token_id,
+            stopping_criteria=StoppingCriteriaList(
+                [_build_footer_stop(tokenizer, prompt_len)]
+            ),
         )
-    new_ids = out[0][inputs["input_ids"].shape[1]:]
+    new_ids = out[0][prompt_len:]
     text = tokenizer.decode(new_ids, skip_special_tokens=True)
     return text, int(new_ids.shape[0])
 
