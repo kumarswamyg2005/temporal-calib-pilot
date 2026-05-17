@@ -1,0 +1,11 @@
+bucket,distance_months,mode,n,accuracy,mean_confidence,overconfidence_gap,ece
+B1,24,thinking_off,10,0.6,1.8,-58.2,0.582
+B1,24,thinking_on,10,0.6,5.0,-55.0,0.55
+B2,12,thinking_off,10,0.7,5.9,-64.1,0.741
+B2,12,thinking_on,10,0.5,16.1,-33.9,0.339
+B3,6,thinking_off,10,0.3,14.0,-16.0,0.36
+B3,6,thinking_on,10,0.5,15.6,-34.4,0.344
+B4,3,thinking_off,10,0.4,6.6,-33.4,0.434
+B4,3,thinking_on,10,0.4,30.3,-9.7,0.597
+B5,1,thinking_off,10,0.5,5.9,-44.1,0.541
+B5,1,thinking_on,10,0.5,19.5,-30.5,0.405
