@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Roadmap — Temporal Calibration</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --blue: #38bdf8; --green: #4ade80; --purple: #c084fc;
+    --yellow: #fbbf24; --red: #f87171; --orange: #fb923c;
+    --bg: #060b14; --card: #0f1a2e; --border: #1e3a5f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: #e2e8f0; overflow-x: hidden; }
+
+  /* ── Animated starfield background ── */
+  .stars { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--d) ease-in-out infinite; opacity: 0; }
+  @keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:var(--o)} }
+
+  /* ── Layout ── */
+  .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 60px 24px 100px; }
+
+  /* ── Fade-in animation ── */
+  .fade { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fade.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── Hero ── */
+  .hero { text-align: center; margin-bottom: 70px; }
+  .hero-badge { display: inline-block; background: linear-gradient(135deg, #1e3a5f, #0f2847); border: 1px solid var(--blue); color: var(--blue); padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; animation: pulse-border 2.5s ease-in-out infinite; }
+  @keyframes pulse-border { 0%,100%{box-shadow:0 0 0 0 rgba(56,189,248,0.3)} 50%{box-shadow:0 0 0 8px rgba(56,189,248,0)} }
+  .hero h1 { font-size: clamp(28px, 5vw, 46px); font-weight: 900; line-height: 1.15; margin-bottom: 16px; background: linear-gradient(135deg, #f8fafc 0%, var(--blue) 50%, var(--purple) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-size: 16px; color: #64748b; max-width: 580px; margin: 0 auto; line-height: 1.7; }
+
+  /* ── Section titles ── */
+  .sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .sec-head .icon { font-size: 22px; }
+  .sec-head h2 { font-size: 20px; font-weight: 700; color: #f8fafc; }
+  .sec-head .line { flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+
+  /* ── Concept cards (What to remember) ── */
+  .concepts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 60px; }
+  .concept-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; position: relative; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; cursor: default; }
+  .concept-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  .concept-card::before { content:''; position:absolute; inset:0; background: radial-gradient(circle at top left, var(--glow) 0%, transparent 60%); opacity: 0.08; pointer-events:none; }
+  .concept-card .emoji { font-size: 28px; margin-bottom: 12px; display: block; }
+  .concept-card h3 { font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
+  .concept-card p { font-size: 13px; color: #94a3b8; line-height: 1.6; margin: 0; }
+  .concept-card .tag { display: inline-block; margin-top: 10px; padding: 3px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+
+  /* ── Timeline / Phases ── */
+  .timeline { position: relative; margin-bottom: 60px; }
+  .timeline::before { content:''; position:absolute; left: 28px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--blue), var(--green), var(--purple)); }
+  .phase { display: flex; gap: 24px; margin-bottom: 32px; align-items: flex-start; }
+  .phase-dot { width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; position: relative; z-index: 1; border: 3px solid; animation: glow-dot 2.5s ease-in-out infinite; }
+  @keyframes glow-dot { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.4)} }
+  .phase-done .phase-dot { background: #0c2340; border-color: var(--blue); box-shadow: 0 0 20px rgba(56,189,248,0.4); }
+  .phase-next .phase-dot { background: #0f2d1a; border-color: var(--green); box-shadow: 0 0 20px rgba(74,222,128,0.4); }
+  .phase-future .phase-dot { background: #1e1040; border-color: var(--purple); box-shadow: 0 0 20px rgba(192,132,252,0.3); }
+  .phase-paper .phase-dot { background: #2d1500; border-color: var(--yellow); box-shadow: 0 0 20px rgba(251,191,36,0.4); }
+
+  .phase-body { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: transform 0.3s; }
+  .phase-body:hover { transform: translateX(4px); }
+  .phase-status { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .phase-body h3 { font-size: 17px; font-weight: 700; color: #f8fafc; margin-bottom: 10px; }
+  .phase-body p { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-bottom: 12px; }
+  .phase-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill-blue   { background: #1e3a5f; color: var(--blue); }
+  .pill-green  { background: #14532d; color: var(--green); }
+  .pill-purple { background: #2d1b4e; color: var(--purple); }
+  .pill-yellow { background: #422006; color: var(--yellow); }
+  .pill-gray   { background: #1e293b; color: #64748b; }
+
+  /* ── What to say to sir ── */
+  .say-box { background: linear-gradient(135deg, #0c1f0c, #0f1f35); border: 1px solid #22c55e; border-radius: 16px; padding: 28px; margin-bottom: 60px; position: relative; overflow: hidden; }
+  .say-box::after { content:''; position:absolute; top:-50%; right:-10%; width:300px; height:300px; background: radial-gradient(circle, rgba(34,197,94,0.08), transparent 70%); pointer-events:none; }
+  .say-box .say-label { color: var(--green); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .say-box .quote { font-size: 15px; color: #bbf7d0; line-height: 1.8; font-style: italic; border-left: 3px solid var(--green); padding-left: 16px; }
+  .say-box .say-points { margin-top: 20px; display: grid; gap: 10px; }
+  .say-point { display: flex; gap: 12px; align-items: flex-start; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px; }
+  .say-point .num { background: var(--green); color: #000; font-weight: 800; font-size: 12px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .say-point p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0; }
+  .say-point strong { color: #e2e8f0; }
+
+  /* ── Key numbers ── */
+  .numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 60px; }
+  .num-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; transition: transform 0.3s; }
+  .num-card:hover { transform: scale(1.04); }
+  .num-card .big-num { font-size: 32px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+  .num-card .num-lbl { font-size: 12px; color: #64748b; line-height: 1.4; }
+
+  /* ── Remember section ── */
+  .remember { background: var(--card); border: 1px solid #f59e0b; border-radius: 16px; padding: 28px; margin-bottom: 60px; }
+  .remember .rem-title { color: var(--yellow); font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .rem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rem-item { display: flex; gap: 10px; align-items: flex-start; }
+  .rem-item .ico { font-size: 18px; flex-shrink: 0; }
+  .rem-item p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0; }
+  .rem-item strong { color: #fde68a; }
+
+  /* ── Footer ── */
+  .footer { text-align: center; color: #1e293b; font-size: 12px; margin-top: 40px; }
+
+  /* ── Animated gradient line ── */
+  .glow-line { height: 2px; background: linear-gradient(90deg, transparent, var(--blue), var(--purple), var(--green), transparent); margin: 48px 0; animation: scan 3s linear infinite; background-size: 200%; }
+  @keyframes scan { 0%{background-position:0%} 100%{background-position:200%} }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Starfield -->
+<div class="stars" id="stars"></div>
+
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero fade">
+    <div class="hero-badge">🔬 NLP Research Project</div>
+    <h1>Temporal Calibration<br>Research Roadmap</h1>
+    <p>Does reasoning make AI overconfident near its knowledge boundary? Here's everything you need to know and remember.</p>
+  </div>
+
+  <!-- Key Concepts -->
+  <div class="fade">
+    <div class="sec-head">
+      <span class="icon">🧠</span>
+      <h2>Key Concepts to Remember</h2>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <div class="concepts fade">
+    <div class="concept-card" style="--glow: #38bdf8;">
+      <span class="emoji">📅</span>
+      <h3>Training Cutoff</h3>
+      <p>The date after which the AI knows nothing. DeepSeek-R1's cutoff is <strong style="color:#38bdf8">~July 2024</strong>. Events near this date have sparse training data — the model knows them, but shakily.</p>
+      <span class="tag" style="background:#1e3a5f; color:#38bdf8">Core idea</span>
+    </div>
+
+    <div class="concept-card" style="--glow: #c084fc;">
+      <span class="emoji">💭</span>
+      <h3>Thinking ON vs OFF</h3>
+      <p><strong style="color:#38bdf8">ON</strong> = model reasons step by step before answering (like showing work). <strong style="color:#c084fc">OFF</strong> = model answers directly, no reasoning. We compare both to see which is more overconfident near the cutoff.</p>
+      <span class="tag" style="background:#2d1b4e; color:#c084fc">The experiment</span>
+    </div>
+
+    <div class="concept-card" style="--glow: #4ade80;">
+      <span class="emoji">📊</span>
+      <h3>Overconfidence Gap</h3>
+      <p>= Stated confidence − Actual accuracy × 100. <strong style="color:#4ade80">Positive</strong> = overconfident. <strong style="color:#38bdf8">Zero</strong> = perfect. <strong style="color:#94a3b8">Negative</strong> = underconfident. We measure this across time buckets.</p>
+      <span class="tag" style="background:#14532d; color:#4ade80">The metric</span>
+    </div>
+
+    <div class="concept-card" style="--glow: #fbbf24;">
+      <span class="emoji">⚡</span>
+      <h3>Inference vs Training</h3>
+      <p><strong style="color:#f87171">Training</strong> = teaching the AI from scratch. Costs millions, takes months. We are NOT doing this. <strong style="color:#4ade80">Inference</strong> = just asking it questions. That's all we do — like using a calculator.</p>
+      <span class="tag" style="background:#422006; color:#fbbf24">Important!</span>
+    </div>
+
+    <div class="concept-card" style="--glow: #fb923c;">
+      <span class="emoji">🔢</span>
+      <h3>What is 14B?</h3>
+      <p>14 Billion parameters = the size of the model. More = smarter but needs more memory. We used 14B (medium). GPT-4o is ~200B+. For Phase 2 we use a much bigger model via API.</p>
+      <span class="tag" style="background:#431407; color:#fb923c">Model size</span>
+    </div>
+
+    <div class="concept-card" style="--glow: #f87171;">
+      <span class="emoji">🎯</span>
+      <h3>Why DeepSeek first?</h3>
+      <p>It's open source (free to run), has a clean Thinking ON/OFF switch, known training cutoff, and the full 671B version via API costs almost nothing. Claude/GPT-4o come in Phase 3 for comparison.</p>
+      <span class="tag" style="background:#450a0a; color:#f87171">Strategy</span>
+    </div>
+  </div>
+
+  <div class="glow-line"></div>
+
+  <!-- Timeline -->
+  <div class="fade">
+    <div class="sec-head">
+      <span class="icon">🗺️</span>
+      <h2>The Full Plan — Phase by Phase</h2>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <div class="timeline fade">
+
+    <!-- Phase 1 -->
+    <div class="phase phase-done">
+      <div class="phase-dot">✅</div>
+      <div class="phase-body">
+        <div class="phase-status" style="color:var(--blue)">Phase 1 — Complete</div>
+        <h3>Proof of Concept — Free Models</h3>
+        <p>Built the full pipeline. Ran 50 questions × 2 modes = 100 calls on DeepSeek-R1-Distill-Qwen-14B using Kaggle's free GPUs. Found 50% accuracy and a mild temporal calibration signal for Thinking ON. Validated the idea works.</p>
+        <div class="phase-meta">
+          <span class="pill pill-blue">50 questions</span>
+          <span class="pill pill-blue">14B model</span>
+          <span class="pill pill-green">$0 cost</span>
+          <span class="pill pill-green">Signal detected ✓</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase phase-next">
+      <div class="phase-dot">🚀</div>
+      <div class="phase-body">
+        <div class="phase-status" style="color:var(--green)">Phase 2 — Needs Approval</div>
+        <h3>Scale Up — DeepSeek API (Full Model)</h3>
+        <p>Write 500 questions (same format, more categories). Use the full DeepSeek-R1 model (671B parameters — 47× bigger than Phase 1) via API. Same pipeline, just API call instead of local GPU. Results will be statistically meaningful. Show to supervisor as proof for Phase 3.</p>
+        <div class="phase-meta">
+          <span class="pill pill-green">500 questions</span>
+          <span class="pill pill-green">671B full model</span>
+          <span class="pill pill-yellow">~₹1000 cost</span>
+          <span class="pill pill-gray">~70–75% accuracy expected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase phase-future">
+      <div class="phase-dot">🧪</div>
+      <div class="phase-body">
+        <div class="phase-status" style="color:var(--purple)">Phase 3 — After Phase 2 Results</div>
+        <h3>Cross-Model Study — Claude + GPT-4o</h3>
+        <p>Same 500 questions on Claude 3.7 and GPT-4o. Compare temporal calibration across 3 different model families. This makes the finding general — not just about one model. Ask supervisor for API funding after showing Phase 2 results.</p>
+        <div class="phase-meta">
+          <span class="pill pill-purple">Claude 3.7</span>
+          <span class="pill pill-purple">GPT-4o</span>
+          <span class="pill pill-yellow">~₹6000–8000</span>
+          <span class="pill pill-gray">~75–80% accuracy expected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paper -->
+    <div class="phase phase-paper">
+      <div class="phase-dot">📄</div>
+      <div class="phase-body">
+        <div class="phase-status" style="color:var(--yellow)">Phase 4 — The Paper</div>
+        <h3>Write & Submit the Research Paper</h3>
+        <p>Combine results from all three models. Add statistical significance tests (bootstrap confidence intervals). Write the paper: intro, related work, methodology, results, discussion. This is the first study to systematically measure temporal calibration vs reasoning mode — a novel contribution.</p>
+        <div class="phase-meta">
+          <span class="pill pill-yellow">3 model families</span>
+          <span class="pill pill-yellow">1000+ questions</span>
+          <span class="pill pill-yellow">Novel contribution</span>
+          <span class="pill pill-yellow">Publishable</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="glow-line"></div>
+
+  <!-- What to say to sir -->
+  <div class="fade">
+    <div class="sec-head">
+      <span class="icon">🎤</span>
+      <h2>What to Say to Your Supervisor</h2>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <div class="say-box fade">
+    <div class="say-label">💬 Your opening line</div>
+    <div class="quote">
+      "I want to study whether AI reasoning makes models overconfident near their training cutoff. No one has studied this specifically before. I've already built the full pipeline and run a proof-of-concept — a signal was detected. I need approval to scale it up into a full paper."
+    </div>
+    <div class="say-points">
+      <div class="say-point">
+        <div class="num">1</div>
+        <p><strong>If asked about cost:</strong> "Phase 2 costs around ₹1000 using DeepSeek API. That's it. No GPU, no training, just sending questions to an API."</p>
+      </div>
+      <div class="say-point">
+        <div class="num">2</div>
+        <p><strong>If asked about training:</strong> "We are not training any model. We are measuring the behaviour of existing AI models — like running an experiment on a person, not building a new one."</p>
+      </div>
+      <div class="say-point">
+        <div class="num">3</div>
+        <p><strong>If asked why this matters:</strong> "If reasoning makes AI overconfident near its knowledge boundary, users will blindly trust wrong answers. Knowing this helps us build better warnings in AI systems."</p>
+      </div>
+      <div class="say-point">
+        <div class="num">4</div>
+        <p><strong>If asked about novelty:</strong> "No prior paper has studied calibration vs temporal proximity to training cutoff specifically for reasoning vs non-reasoning models. This is a clear gap."</p>
+      </div>
+      <div class="say-point">
+        <div class="num">5</div>
+        <p><strong>If asked about timeline:</strong> "Phase 2 can be done in 2–3 weeks. Questions take 1–2 weeks to write. The API run takes a few hours. Analysis and charts are automated."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Numbers -->
+  <div class="fade">
+    <div class="sec-head">
+      <span class="icon">🔢</span>
+      <h2>Numbers to Remember</h2>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <div class="numbers fade">
+    <div class="num-card">
+      <div class="big-num" style="color:var(--blue)">50</div>
+      <div class="num-lbl">Questions in Phase 1 (done)</div>
+    </div>
+    <div class="num-card">
+      <div class="big-num" style="color:var(--green)">500</div>
+      <div class="num-lbl">Questions needed for Phase 2</div>
+    </div>
+    <div class="num-card">
+      <div class="big-num" style="color:var(--green)">50%</div>
+      <div class="num-lbl">Current accuracy (Phase 1)</div>
+    </div>
+    <div class="num-card">
+      <div class="big-num" style="color:var(--yellow)">75%</div>
+      <div class="num-lbl">Expected accuracy (Phase 2)</div>
+    </div>
+    <div class="num-card">
+      <div class="big-num" style="color:var(--green)">₹0</div>
+      <div class="num-lbl">Cost of Phase 1</div>
+    </div>
+    <div class="num-card">
+      <div class="big-num" style="color:var(--yellow)">₹1K</div>
+      <div class="num-lbl">Cost of Phase 2</div>
+    </div>
+    <div class="num-card">
+      <div class="big-num" style="color:var(--purple)">₹8K</div>
+      <div class="num-lbl">Cost of Phase 3 (Claude+GPT)</div>
+    </div>
+    <div class="num-card">
+      <div class="big-num" style="color:var(--blue)">14B</div>
+      <div class="num-lbl">Model size used in Phase 1</div>
+    </div>
+  </div>
+
+  <!-- Remember! -->
+  <div class="remember fade">
+    <div class="rem-title">⚠️ Things to Never Forget</div>
+    <div class="rem-grid">
+      <div class="rem-item">
+        <span class="ico">🚫</span>
+        <p><strong>We are NOT training</strong> any model. We are only asking it questions and measuring answers. Training costs millions.</p>
+      </div>
+      <div class="rem-item">
+        <span class="ico">🎯</span>
+        <p>The research question is: <strong>does reasoning make AI overconfident near its training cutoff?</strong> One clear sentence.</p>
+      </div>
+      <div class="rem-item">
+        <span class="ico">📅</span>
+        <p>DeepSeek-R1's training cutoff is <strong>~July 2024</strong>. Questions from June 2024 = 1 month away. Questions from July 2022 = 24 months away.</p>
+      </div>
+      <div class="rem-item">
+        <span class="ico">📊</span>
+        <p>Overconfidence gap = <strong>confidence − accuracy</strong>. Our result was negative (underconfident) but Thinking ON shows the right gradient trend.</p>
+      </div>
+      <div class="rem-item">
+        <span class="ico">💡</span>
+        <p>Why DeepSeek first: <strong>free, open source, native thinking mode, cheapest API</strong>. Claude and GPT come later for cross-model comparison.</p>
+      </div>
+      <div class="rem-item">
+        <span class="ico">✅</span>
+        <p>The pipeline is <strong>fully built and working</strong>. Phase 2 only needs: more questions + API key. No new engineering required.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Built for the Temporal Calibration Pilot · Open in any browser · No internet needed after load</div>
+
+</div>
+
+<script>
+  // Generate stars
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      --d:${(Math.random()*4+2).toFixed(1)}s;
+      --o:${(Math.random()*0.6+0.1).toFixed(2)};
+      animation-delay:${(Math.random()*5).toFixed(1)}s;
+    `;
+    container.appendChild(s);
+  }
+
+  // Scroll-triggered fade-in
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
