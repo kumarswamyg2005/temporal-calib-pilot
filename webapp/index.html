@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temporal Calibration Pilot</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+    const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, ResponsiveContainer } = Recharts;
+
+    // Pre-computed results embedded directly — no file loading needed
+    const SUMMARY = [
+      { bucket:"B1", months:24, mode:"thinking_on",  n:10, accuracy:0.6, mean_conf:5.0,  gap:-55.0, ece:0.550 },
+      { bucket:"B1", months:24, mode:"thinking_off", n:10, accuracy:0.6, mean_conf:1.8,  gap:-58.2, ece:0.582 },
+      { bucket:"B2", months:12, mode:"thinking_on",  n:10, accuracy:0.5, mean_conf:16.1, gap:-33.9, ece:0.339 },
+      { bucket:"B2", months:12, mode:"thinking_off", n:10, accuracy:0.7, mean_conf:5.9,  gap:-64.1, ece:0.741 },
+      { bucket:"B3", months:6,  mode:"thinking_on",  n:10, accuracy:0.5, mean_conf:15.6, gap:-34.4, ece:0.344 },
+      { bucket:"B3", months:6,  mode:"thinking_off", n:10, accuracy:0.3, mean_conf:14.0, gap:-16.0, ece:0.360 },
+      { bucket:"B4", months:3,  mode:"thinking_on",  n:10, accuracy:0.4, mean_conf:30.3, gap:-9.7,  ece:0.597 },
+      { bucket:"B4", months:3,  mode:"thinking_off", n:10, accuracy:0.4, mean_conf:6.6,  gap:-33.4, ece:0.434 },
+      { bucket:"B5", months:1,  mode:"thinking_on",  n:10, accuracy:0.5, mean_conf:19.5, gap:-30.5, ece:0.405 },
+      { bucket:"B5", months:1,  mode:"thinking_off", n:10, accuracy:0.5, mean_conf:5.9,  gap:-44.1, ece:0.541 },
+    ];
+
+    const OVERALL = {
+      thinking_on:  { accuracy: 0.50, mean_conf: 17.3, median_conf: 9,  parse_ok: 0.78 },
+      thinking_off: { accuracy: 0.50, mean_conf: 6.8,  median_conf: 1,  parse_ok: 0.90 },
+    };
+
+    const chartData = [24, 12, 6, 3, 1].map(m => {
+      const on  = SUMMARY.find(r => r.months === m && r.mode === "thinking_on");
+      const off = SUMMARY.find(r => r.months === m && r.mode === "thinking_off");
+      return { months: `${m}mo`, thinking_on: on?.gap, thinking_off: off?.gap };
+    });
+
+    // Styles
+    const S = {
+      page:   { maxWidth: 1100, margin: '0 auto', padding: '32px 24px' },
+      header: { marginBottom: 36 },
+      title:  { fontSize: 26, fontWeight: 700, color: '#f8fafc', marginBottom: 6 },
+      sub:    { fontSize: 14, color: '#64748b' },
+      grid2:  { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 },
+      grid4:  { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 },
+      card:   { background: '#1e293b', border: '1px solid #334155', borderRadius: 12, padding: 20 },
+      sec:    { marginBottom: 32 },
+      secTitle: { fontSize: 16, fontWeight: 600, color: '#7dd3fc', marginBottom: 14, paddingBottom: 8, borderBottom: '1px solid #1e293b' },
+      statNum: { fontSize: 28, fontWeight: 700, color: '#38bdf8' },
+      statLbl: { fontSize: 12, color: '#94a3b8', marginTop: 4 },
+      table:  { width:'100%', borderCollapse:'collapse', fontSize: 13 },
+      th:     { background:'#1e3a5f', color:'#7dd3fc', padding:'9px 12px', textAlign:'left', fontWeight:600 },
+      td:     { padding:'8px 12px', borderBottom:'1px solid #1e293b', color:'#cbd5e1' },
+      tag:    { display:'inline-block', background:'#1e3a5f', color:'#38bdf8', padding:'3px 10px', borderRadius:12, fontSize:12, fontWeight:600 },
+      verdict:{ background:'#14532d', border:'2px solid #22c55e', borderRadius:12, padding:20, marginTop:16 },
+      note:   { background:'#1e293b', borderLeft:'4px solid #38bdf8', borderRadius:'0 8px 8px 0', padding:'14px 18px', marginTop:16, fontSize:13, color:'#94a3b8' },
+      tab:    { padding:'8px 18px', border:'none', borderRadius:6, cursor:'pointer', fontSize:13, fontWeight:600 },
+    };
+
+    function StatCard({ num, label, sub, color }) {
+      return (
+        <div style={S.card}>
+          <div style={{ ...S.statNum, color: color || '#38bdf8' }}>{num}</div>
+          <div style={S.statLbl}>{label}</div>
+          {sub && <div style={{ fontSize:11, color:'#475569', marginTop:3 }}>{sub}</div>}
+        </div>
+      );
+    }
+
+    function GapBadge({ val }) {
+      const color = val > -15 ? '#4ade80' : val > -40 ? '#60a5fa' : '#94a3b8';
+      return <span style={{ color, fontWeight: val > -15 ? 700 : 400 }}>{val.toFixed(1)} pp</span>;
+    }
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('overview');
+      const tabs = [
+        { id: 'overview', label: 'Overview' },
+        { id: 'chart',    label: 'Chart' },
+        { id: 'table',    label: 'Full Table' },
+        { id: 'about',    label: 'About' },
+      ];
+
+      return (
+        <div style={S.page}>
+          {/* Header */}
+          <div style={S.header}>
+            <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
+              <span style={S.tag}>NLP Research Pilot</span>
+              <span style={{ ...S.tag, background:'#14532d', color:'#4ade80' }}>Completed</span>
+            </div>
+            <h1 style={S.title}>Temporal Calibration Pilot</h1>
+            <p style={S.sub}>DeepSeek-R1-Distill-Qwen-14B (fp16) · 50 questions × 2 modes · Kaggle GPU T4 ×2 · $0 cost</p>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display:'flex', gap:8, marginBottom:28, borderBottom:'1px solid #1e293b', paddingBottom:12 }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setActiveTab(t.id)}
+                style={{ ...S.tab, background: activeTab===t.id ? '#1e3a5f' : 'transparent',
+                         color: activeTab===t.id ? '#38bdf8' : '#94a3b8' }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* OVERVIEW TAB */}
+          {activeTab === 'overview' && (
+            <>
+              <div style={S.grid4}>
+                <StatCard num="50%" label="Thinking ON accuracy" sub="25/50 correct" />
+                <StatCard num="50%" label="Thinking OFF accuracy" sub="25/50 correct" />
+                <StatCard num="9" label="Median confidence — ON" sub="On 0–100 scale" color="#facc15" />
+                <StatCard num="1" label="Median confidence — OFF" sub="On 0–100 scale" color="#f87171" />
+              </div>
+
+              <div style={S.grid2}>
+                <div style={S.card}>
+                  <div style={S.secTitle}>Thinking ON — by bucket</div>
+                  {[24,12,6,3,1].map(m => {
+                    const r = SUMMARY.find(x => x.months===m && x.mode==='thinking_on');
+                    const pct = (r.accuracy * 100).toFixed(0);
+                    return (
+                      <div key={m} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderBottom:'1px solid #1e293b' }}>
+                        <span style={{ color:'#94a3b8', fontSize:13 }}>{m} months away</span>
+                        <span style={{ color:'#e2e8f0', fontSize:13 }}>{pct}% acc</span>
+                        <GapBadge val={r.gap} />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={S.card}>
+                  <div style={S.secTitle}>Thinking OFF — by bucket</div>
+                  {[24,12,6,3,1].map(m => {
+                    const r = SUMMARY.find(x => x.months===m && x.mode==='thinking_off');
+                    const pct = (r.accuracy * 100).toFixed(0);
+                    return (
+                      <div key={m} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderBottom:'1px solid #1e293b' }}>
+                        <span style={{ color:'#94a3b8', fontSize:13 }}>{m} months away</span>
+                        <span style={{ color:'#e2e8f0', fontSize:13 }}>{pct}% acc</span>
+                        <GapBadge val={r.gap} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={S.verdict}>
+                <div style={{ color:'#4ade80', fontWeight:600, fontSize:12, letterSpacing:1, textTransform:'uppercase', marginBottom:6 }}>Verdict</div>
+                <p style={{ color:'#bbf7d0', fontSize:15 }}>Mild signal — Thinking ON shows a temporal calibration gradient. Scale up to confirm.</p>
+                <p style={{ color:'#86efac', fontSize:13, marginTop:8 }}>Signal strength: 13.6 pp (ON less underconfident than OFF near cutoff, and ON drifts toward calibration as events approach the cutoff).</p>
+              </div>
+
+              <div style={S.note}>
+                <strong style={{ color:'#7dd3fc' }}>Note on direction:</strong> Both modes are systematically <em>underconfident</em> (all gaps negative) — the model expresses very low confidence (median 9% for ON, 1% for OFF) while being 50% accurate. The hypothesis expected overconfidence; we found the opposite, but the temporal gradient for Thinking ON is in the expected direction.
+              </div>
+            </>
+          )}
+
+          {/* CHART TAB */}
+          {activeTab === 'chart' && (
+            <div style={S.card}>
+              <div style={S.secTitle}>Overconfidence Gap vs Temporal Distance from Training Cutoff</div>
+              <p style={{ fontSize:12, color:'#64748b', marginBottom:20 }}>
+                Gap = mean confidence − accuracy × 100. Zero = perfectly calibrated. Negative = underconfident. X-axis: months to cutoff (cutoff is on the right).
+              </p>
+              <ResponsiveContainer width="100%" height={380}>
+                <LineChart data={chartData} margin={{ top:10, right:30, bottom:10, left:10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis dataKey="months" tick={{ fill:'#94a3b8', fontSize:12 }} reversed />
+                  <YAxis tick={{ fill:'#94a3b8', fontSize:12 }} domain={[-75, 10]} tickFormatter={v => `${v}`} />
+                  <Tooltip
+                    contentStyle={{ background:'#1e293b', border:'1px solid #334155', borderRadius:8, fontSize:12 }}
+                    labelStyle={{ color:'#7dd3fc', fontWeight:600 }}
+                    formatter={(val, name) => [`${val.toFixed(1)} pp`, name === 'thinking_on' ? 'Thinking ON' : 'Thinking OFF']}
+                  />
+                  <Legend formatter={v => v === 'thinking_on' ? 'Thinking ON' : 'Thinking OFF'} wrapperStyle={{ fontSize:13, paddingTop:12 }} />
+                  <ReferenceLine y={0} stroke="#334155" strokeDasharray="4 4" label={{ value:'Perfectly calibrated', fill:'#475569', fontSize:11, position:'insideTopLeft' }} />
+                  <Line type="monotone" dataKey="thinking_on"  stroke="#38bdf8" strokeWidth={2.5} dot={{ r:5, fill:'#38bdf8' }} activeDot={{ r:7 }} />
+                  <Line type="monotone" dataKey="thinking_off" stroke="#f59e0b" strokeWidth={2.5} dot={{ r:5, fill:'#f59e0b' }} strokeDasharray="6 3" activeDot={{ r:7 }} />
+                </LineChart>
+              </ResponsiveContainer>
+              <p style={{ fontSize:11, color:'#475569', marginTop:12, textAlign:'center' }}>n=10 per bucket · Higher = more overconfident · Pilot study, not statistically significant</p>
+            </div>
+          )}
+
+          {/* TABLE TAB */}
+          {activeTab === 'table' && (
+            <div style={S.card}>
+              <div style={S.secTitle}>Full Per-Bucket Results</div>
+              <div style={{ overflowX:'auto' }}>
+                <table style={S.table}>
+                  <thead>
+                    <tr>
+                      {['Bucket','Months to Cutoff','Mode','N','Accuracy','Mean Conf','Overconf Gap','ECE'].map(h => (
+                        <th key={h} style={S.th}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {SUMMARY.map((r, i) => (
+                      <tr key={i}>
+                        <td style={S.td}>{r.bucket}</td>
+                        <td style={S.td}>{r.months}</td>
+                        <td style={S.td}>
+                          <span style={{ ...S.tag, background: r.mode==='thinking_on' ? '#1e3a5f' : '#2d1b4e',
+                            color: r.mode==='thinking_on' ? '#38bdf8' : '#c084fc', fontSize:11 }}>
+                            {r.mode === 'thinking_on' ? 'Thinking ON' : 'Thinking OFF'}
+                          </span>
+                        </td>
+                        <td style={S.td}>{r.n}</td>
+                        <td style={S.td}>{(r.accuracy*100).toFixed(0)}%</td>
+                        <td style={S.td}>{r.mean_conf.toFixed(1)}</td>
+                        <td style={S.td}><GapBadge val={r.gap} /></td>
+                        <td style={S.td}>{r.ece.toFixed(3)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ ...S.note, marginTop:16 }}>
+                <strong style={{ color:'#7dd3fc' }}>Overconfidence gap</strong> = mean_confidence − accuracy × 100. Positive = overconfident · Zero = perfect · Negative = underconfident.
+                <br/><strong style={{ color:'#4ade80' }}>ECE</strong> = Expected Calibration Error (lower is better).
+              </div>
+            </div>
+          )}
+
+          {/* ABOUT TAB */}
+          {activeTab === 'about' && (
+            <div style={S.grid2}>
+              <div>
+                <div style={S.card}>
+                  <div style={S.secTitle}>Hypothesis</div>
+                  <p style={{ fontSize:14, color:'#cbd5e1', lineHeight:1.7 }}>
+                    A reasoning-mode LLM (Thinking ON) will become <em>more overconfident</em> on factual questions as those events approach its training cutoff — more so than the same model without reasoning (Thinking OFF).
+                  </p>
+                </div>
+                <br />
+                <div style={S.card}>
+                  <div style={S.secTitle}>Dataset</div>
+                  <p style={{ fontSize:13, color:'#94a3b8', marginBottom:12 }}>50 hand-curated open-ended factual questions. 5 temporal buckets (B1–B5), 10 questions each, across 5 categories.</p>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                    {['Sports','Politics','Science','Business','Entertainment'].map(c => (
+                      <span key={c} style={S.tag}>{c}</span>
+                    ))}
+                  </div>
+                </div>
+                <br />
+                <div style={S.card}>
+                  <div style={S.secTitle}>Platform & Cost</div>
+                  <p style={{ fontSize:13, color:'#94a3b8' }}>Run entirely on <strong style={{color:'#e2e8f0'}}>Kaggle free tier</strong> — GPU T4 ×2 (~31 GB VRAM). Zero API cost. Full run takes ~2–3 hours.</p>
+                </div>
+              </div>
+              <div>
+                <div style={S.card}>
+                  <div style={S.secTitle}>Model</div>
+                  <p style={{ fontSize:13, color:'#94a3b8', marginBottom:8 }}>DeepSeek-R1-Distill-Qwen-14B in fp16. Training cutoff ≈ July 2024.</p>
+                  <p style={{ fontSize:13, color:'#94a3b8' }}>The 7B distill was tried first — uniform ~8–22% accuracy (floor effect), no temporal gradient. The 14B distill gives 50% accuracy with a detectable calibration signal.</p>
+                </div>
+                <br />
+                <div style={S.card}>
+                  <div style={S.secTitle}>Limitations</div>
+                  <ul style={{ listStyle:'none', padding:0 }}>
+                    {[
+                      'N=50 — too small for statistical significance',
+                      'Single model family — no cross-model claims',
+                      'Verbalized confidence is noisy',
+                      'Thinking OFF is methodologically awkward',
+                      'Training cutoff is approximate',
+                    ].map(l => (
+                      <li key={l} style={{ fontSize:13, color:'#94a3b8', padding:'6px 0', borderBottom:'1px solid #1e293b', paddingLeft:16, position:'relative' }}>
+                        <span style={{ position:'absolute', left:0, color:'#475569' }}>·</span>{l}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <br />
+                <div style={S.card}>
+                  <div style={S.secTitle}>For a Full Paper</div>
+                  {[
+                    ['Questions', '50 → 500–1200'],
+                    ['Models', '1 → 3–5 families'],
+                    ['Confidence', 'Verbalized → Log-probabilities'],
+                    ['Statistics', 'None → Bootstrap CIs'],
+                  ].map(([k,v]) => (
+                    <div key={k} style={{ display:'flex', justifyContent:'space-between', fontSize:13, padding:'6px 0', borderBottom:'1px solid #1e293b' }}>
+                      <span style={{ color:'#94a3b8' }}>{k}</span>
+                      <span style={{ color:'#e2e8f0' }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
