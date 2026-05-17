@@ -230,6 +230,83 @@ body {
 .blockquote p { font-family: 'Lora', Georgia, serif; font-style: italic; font-size: 16px; color: var(--ink); line-height: 1.7; margin: 0; }
 .blockquote cite { display: block; margin-top: 10px; font-size: 12px; color: var(--muted); font-style: normal; }
 
+/* ── Honest review blocks ── */
+.honest-block { border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+.honest-header { display: flex; align-items: center; gap: 16px; padding: 18px 24px; }
+.hh-yellow { background: #fffbeb; border-bottom: 1px solid #fde68a; }
+.hh-red    { background: #fff5f5; border-bottom: 1px solid #fecaca; }
+.hh-blue   { background: #eff6ff; border-bottom: 1px solid #bfdbfe; }
+.hh-green  { background: #f0fdf4; border-bottom: 1px solid #bbf7d0; }
+.hh-icon { font-size: 22px; flex-shrink: 0; }
+.hh-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+.hh-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Related work list */
+.related-list { padding: 0; }
+.related-item { display: flex; gap: 16px; padding: 16px 24px; border-bottom: 1px solid var(--rule); transition: background 0.15s; }
+.related-item:last-child { border-bottom: none; }
+.related-item:hover { background: #fafaf9; }
+.ri-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; white-space: nowrap; height: fit-content; flex-shrink: 0; margin-top: 2px; }
+.ri-danger .ri-badge { background: #fee2e2; color: var(--red); }
+.ri-mid    .ri-badge { background: #fef3c7; color: var(--accent); }
+.ri-good   .ri-badge { background: #dcfce7; color: var(--green); }
+.ri-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.ri-desc  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.ri-desc em { color: var(--red); font-style: normal; font-weight: 500; }
+
+/* Problem list */
+.problem-list { padding: 0; }
+.problem-item { display: flex; gap: 16px; padding: 18px 24px; border-bottom: 1px solid var(--rule); transition: background 0.15s; }
+.problem-item:last-child { border-bottom: none; }
+.problem-item:hover { background: #fff9f9; }
+.prob-num { background: #fee2e2; color: var(--red); font-weight: 700; font-size: 13px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.prob-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+.prob-desc  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.prob-desc strong { color: var(--ink); font-weight: 600; }
+
+/* Fix list */
+.fix-list { padding: 0; }
+.fix-item { display: flex; gap: 16px; padding: 18px 24px; border-bottom: 1px solid var(--rule); transition: background 0.15s; align-items: flex-start; }
+.fix-item:last-child { border-bottom: none; }
+.fix-item:hover { background: #f8faff; }
+.fix-priority { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+.fp-high { background: #fee2e2; color: var(--red); }
+.fp-med  { background: #fef3c7; color: var(--accent); }
+.fp-low  { background: #f0fdf4; color: var(--green); }
+.fix-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+.fix-desc  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+.fix-desc code { background: var(--rule); padding: 1px 5px; border-radius: 3px; font-size: 12px; color: var(--blue); font-family: monospace; }
+
+/* Target grid */
+.target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); }
+.target-item { background: var(--card); padding: 20px 24px; transition: background 0.15s; }
+.target-item:hover { background: #fafaf9; }
+.ti-status { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.ti-venue  { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.ti-desc   { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+.ti-check  { font-size: 12px; font-weight: 600; }
+.ti-now   .ti-check { color: var(--green); }
+.ti-p2    .ti-check { color: var(--accent); }
+.ti-p3    .ti-check { color: var(--blue); }
+.ti-full  .ti-check { color: var(--muted); }
+
+/* Bottom line */
+.bottom-line { background: var(--ink); border-radius: 12px; padding: 32px; color: white; }
+.bl-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.bl-main  { font-size: 14px; color: #d1d5db; line-height: 1.75; margin-bottom: 12px; }
+.bl-main em { color: #f9fafb; font-style: normal; font-weight: 500; }
+.bl-main strong { color: #f9fafb; }
+.bl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+.bl-item { border-radius: 8px; padding: 18px; }
+.bl-good { background: rgba(22,163,74,0.15); border: 1px solid rgba(22,163,74,0.3); }
+.bl-bad  { background: rgba(220,38,38,0.12); border: 1px solid rgba(220,38,38,0.25); }
+.bl-item-title { font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.bl-good .bl-item-title { color: #4ade80; }
+.bl-bad  .bl-item-title { color: #f87171; }
+.bl-item ul { list-style: none; padding: 0; }
+.bl-item ul li { font-size: 13px; color: #9ca3af; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); line-height: 1.5; }
+.bl-item ul li:last-child { border-bottom: none; }
+
 /* ── Counter animation ── */
 .counting { display: inline-block; }
 
@@ -261,6 +338,7 @@ body {
     <nav>
       <a href="#concepts">Concepts</a>
       <a href="#phases">Phases</a>
+      <a href="#honest">Honest Review</a>
       <a href="#sir">For Sir</a>
       <a href="#remember">Remember</a>
     </nav>
@@ -543,6 +621,229 @@ body {
         </tr>
       </table>
     </div>
+  </div>
+
+  <!-- Honest Review -->
+  <div class="section reveal" id="honest">
+    <div class="section-label"><span class="num">06</span> Honest assessment of this idea</div>
+
+    <!-- What already exists -->
+    <div class="honest-block reveal">
+      <div class="honest-header hh-yellow">
+        <span class="hh-icon">📚</span>
+        <div>
+          <div class="hh-title">What already exists</div>
+          <div class="hh-sub">Papers close to this idea — you need to know these</div>
+        </div>
+      </div>
+      <div class="related-list">
+        <div class="related-item ri-danger">
+          <div class="ri-badge">Closest overlap</div>
+          <div class="ri-content">
+            <div class="ri-title">"The Cost of Reasoning: Chain-of-Thought Induces Overconfidence" (2025)</div>
+            <div class="ri-desc">Already shows CoT worsens calibration. A reviewer will ask: <em>"What does your paper add beyond this?"</em> Your answer: we specifically study temporal proximity to the training cutoff — they don't.</div>
+          </div>
+        </div>
+        <div class="related-item ri-danger">
+          <div class="ri-badge">Overlaps</div>
+          <div class="ri-content">
+            <div class="ri-title">"Beware of Reasoning Overconfidence" (2025)</div>
+            <div class="ri-desc">Same territory — CoT causes overconfidence generally. Again, the temporal cutoff angle is missing from their work.</div>
+          </div>
+        </div>
+        <div class="related-item ri-mid">
+          <div class="ri-badge">Related</div>
+          <div class="ri-content">
+            <div class="ri-title">"Dated Data: Tracing Knowledge Cutoffs in LLMs"</div>
+            <div class="ri-desc">Studies how knowledge decays near the cutoff — but never looks at reasoning mode vs no reasoning. No calibration analysis.</div>
+          </div>
+        </div>
+        <div class="related-item ri-mid">
+          <div class="ri-badge">Related</div>
+          <div class="ri-content">
+            <div class="ri-title">"LLMLagBench: Identifying Temporal Training Boundaries"</div>
+            <div class="ri-desc">Maps where model knowledge drops off — useful background, but no CoT analysis at all.</div>
+          </div>
+        </div>
+        <div class="related-item ri-good">
+          <div class="ri-badge">Your gap ✓</div>
+          <div class="ri-content">
+            <div class="ri-title">CoT + temporal proximity + calibration — not studied together</div>
+            <div class="ri-desc">No paper combines all three: reasoning mode, how close the event is to the training cutoff, and the resulting calibration gap. That specific intersection is genuinely novel.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Honest problems -->
+    <div class="honest-block reveal">
+      <div class="honest-header hh-red">
+        <span class="hh-icon">⚠</span>
+        <div>
+          <div class="hh-title">Honest problems with the current version</div>
+          <div class="hh-sub">Things a reviewer would reject this for right now</div>
+        </div>
+      </div>
+      <div class="problem-list">
+        <div class="problem-item">
+          <div class="prob-num">1</div>
+          <div class="prob-body">
+            <div class="prob-title">The result contradicts the hypothesis</div>
+            <div class="prob-desc">We expected overconfidence. We found underconfidence. The model said "5% sure" while being 50% accurate. That's still a finding — but it complicates the story. A stronger model in Phase 2 might show the overconfidence we expected. Or it might not. We don't know yet.</div>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="prob-num">2</div>
+          <div class="prob-body">
+            <div class="prob-title">Self-reported confidence is weak methodology</div>
+            <div class="prob-desc">We asked the model to say "I'm 80% sure." Reviewers at serious venues know these numbers are unreliable — the model is guessing a number, not giving a real probability. The correct method is <strong>token log-probabilities</strong> — the actual maths of what the model thinks. Already planned but not built yet.</div>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="prob-num">3</div>
+          <div class="prob-body">
+            <div class="prob-title">N=50 is too small to claim anything</div>
+            <div class="prob-desc">10 questions per bucket is not enough for statistical significance. If one question goes wrong by luck, it changes the entire bucket's result. Need at least 100 per bucket (500 total) to say anything meaningful.</div>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="prob-num">4</div>
+          <div class="prob-body">
+            <div class="prob-title">Only one model family</div>
+            <div class="prob-desc">Results from one model = one data point. Reviewers will ask: "Is this specific to DeepSeek, or does it hold generally?" You can't answer that without testing Claude and GPT-4o too.</div>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="prob-num">5</div>
+          <div class="prob-body">
+            <div class="prob-title">The Thinking OFF method is a workaround</div>
+            <div class="prob-desc">We force the model to skip reasoning by pre-filling empty think tags. This is a hack — the model is RL-trained to always reason, so this condition is unnatural. A cleaner baseline would be a different model that doesn't reason at all.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What to do to make it better -->
+    <div class="honest-block reveal">
+      <div class="honest-header hh-blue">
+        <span class="hh-icon">🛠</span>
+        <div>
+          <div class="hh-title">What to change to make the paper stronger</div>
+          <div class="hh-sub">Concrete fixes, in order of importance</div>
+        </div>
+      </div>
+      <div class="fix-list">
+        <div class="fix-item">
+          <div class="fix-priority fp-high">Must do</div>
+          <div class="fix-body">
+            <div class="fix-title">Switch to log-probability confidence</div>
+            <div class="fix-desc">Instead of asking "how confident are you?", use the model's internal token probabilities — the actual mathematical output. This is already stubbed in <code>src/api_runner.py</code>. Implementing this turns a weak methodology into a strong one. No extra API cost.</div>
+          </div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-priority fp-high">Must do</div>
+          <div class="fix-body">
+            <div class="fix-title">Scale to 500+ questions (100 per bucket)</div>
+            <div class="fix-desc">100 per bucket gives enough statistical power to run proper significance tests. Write questions semi-automatically using ChatGPT or Gemini as a draft generator, then manually verify each one. This is Phase 2 of the plan.</div>
+          </div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-priority fp-high">Must do</div>
+          <div class="fix-body">
+            <div class="fix-title">Test at least 3 model families</div>
+            <div class="fix-desc">DeepSeek-R1 (done), Claude 3.7 Sonnet (has extended thinking), GPT-4o (with/without chain-of-thought prompting). A finding that appears in all three is publishable. One that appears in only DeepSeek is a curiosity.</div>
+          </div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-priority fp-med">Should do</div>
+          <div class="fix-body">
+            <div class="fix-title">Add a clean non-reasoning baseline</div>
+            <div class="fix-desc">Use a plain instruct model (like Llama-3-Instruct, which has no reasoning mode at all) as the OFF baseline instead of the hack. This makes the ON vs OFF comparison scientifically clean.</div>
+          </div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-priority fp-med">Should do</div>
+          <div class="fix-body">
+            <div class="fix-title">Add statistical significance tests</div>
+            <div class="fix-desc">Bootstrap confidence intervals on the overconfidence gap. Without these, a reviewer can dismiss the whole thing as noise. Python's <code>scipy.stats</code> handles this in 10 lines of code — already have the data structure for it.</div>
+          </div>
+        </div>
+        <div class="fix-item">
+          <div class="fix-priority fp-low">Nice to have</div>
+          <div class="fix-body">
+            <div class="fix-title">Add more temporal buckets</div>
+            <div class="fix-desc">Currently 5 buckets (1, 3, 6, 12, 24 months). Adding 2-week and 2-month buckets near the cutoff would give a much finer picture of exactly where the calibration breaks down.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Realistic assessment -->
+    <div class="honest-block reveal">
+      <div class="honest-header hh-green">
+        <span class="hh-icon">🎯</span>
+        <div>
+          <div class="hh-title">Realistic assessment — where can this get published?</div>
+          <div class="hh-sub">Honest targets based on current state and what Phase 2+3 would unlock</div>
+        </div>
+      </div>
+      <div class="target-grid">
+        <div class="target-item ti-now">
+          <div class="ti-status">Right now</div>
+          <div class="ti-venue">Student project / thesis chapter</div>
+          <div class="ti-desc">Solid, complete, well-documented. Good enough to show any supervisor and use as a thesis section.</div>
+          <div class="ti-check">✓ Ready</div>
+        </div>
+        <div class="target-item ti-p2">
+          <div class="ti-status">After Phase 2</div>
+          <div class="ti-venue">Workshop paper at ACL / EMNLP</div>
+          <div class="ti-desc">Workshops accept preliminary findings with a clear novel angle. 500 questions + log-probs + DeepSeek full model = workshop-ready.</div>
+          <div class="ti-check">→ 2–3 months away</div>
+        </div>
+        <div class="target-item ti-p3">
+          <div class="ti-status">After Phase 2+3</div>
+          <div class="ti-venue">Short paper / findings note at ACL</div>
+          <div class="ti-desc">3 models + 500 questions + log-probs + significance tests = a short paper submission to a top venue.</div>
+          <div class="ti-check">→ 4–6 months away</div>
+        </div>
+        <div class="target-item ti-full">
+          <div class="ti-status">Full scale</div>
+          <div class="ti-venue">Main conference paper (ACL / EMNLP)</div>
+          <div class="ti-desc">1200 questions, 3–5 models, log-probs, clean baseline, significance tests, ablations. This is the full version.</div>
+          <div class="ti-check">→ 8–12 months away</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom line -->
+    <div class="bottom-line reveal">
+      <div class="bl-label">Bottom line</div>
+      <p class="bl-main">The idea is worth pursuing. The research gap is real — no paper combines CoT reasoning, temporal proximity to training cutoff, and calibration in one study. Two papers already show CoT causes overconfidence generally, which means the field is interested in this direction. Your angle — <em>does it get worse near the knowledge boundary?</em> — is the specific new contribution.</p>
+      <p class="bl-main">But go into the supervisor meeting knowing this is a <strong>pilot</strong>, not a finished paper. The pitch is: "I found a real gap, proved the pipeline works, and need resources to scale it up." That is an honest and strong pitch. Don't oversell the current result.</p>
+      <div class="bl-grid">
+        <div class="bl-item bl-good">
+          <div class="bl-item-title">✓ What's strong</div>
+          <ul>
+            <li>Genuinely novel intersection</li>
+            <li>Full pipeline already built and working</li>
+            <li>Clear, simple research question</li>
+            <li>Timely — reasoning models are everywhere right now</li>
+            <li>Phase 1 completed for free</li>
+          </ul>
+        </div>
+        <div class="bl-item bl-bad">
+          <div class="bl-item-title">✗ What needs work</div>
+          <ul>
+            <li>Result is underconfidence, not overconfidence</li>
+            <li>Need log-probability confidence, not self-reported</li>
+            <li>N=50 is not publishable on its own</li>
+            <li>Need 3 model families minimum</li>
+            <li>Statistical significance tests not yet done</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 </main>
